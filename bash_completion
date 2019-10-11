@@ -1435,11 +1435,16 @@ _dvd_devices()
 # TERM environment variable values
 _terms()
 {
+    local reset=$(shopt -p nullglob); shopt -s nullglob
+    local files=(/{etc,lib,usr/lib,usr/share}/terminfo/*/*)
+    eval "$reset"
+    if [[ ${#files[@]} -gt 0 ]]; then
+        COMPREPLY+=( $(compgen -W '${files[@]##*/}' -- "$cur") )
+        return
+    fi
     COMPREPLY+=( $(compgen -W "$({ \
         command sed -ne 's/^\([^[:space:]#|]\{2,\}\)|.*/\1/p' /etc/termcap;
         { toe -a || toe; } | awk '{ print $1 }';
-        find /{etc,lib,usr/lib,usr/share}/terminfo/? -type f -maxdepth 1 \
-            | awk -F/ '{ print $NF }';
     } 2>/dev/null)" -- "$cur") )
 }
 
